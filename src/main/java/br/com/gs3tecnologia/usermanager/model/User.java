@@ -7,12 +7,19 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Entity
 @Data
 @Table(name = "TB_USER")
-public class User {
+public class User implements Serializable {
 
-    @Id
+
+	@Serial
+    private static final long serialVersionUID = -5045643614971012521L;
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
