@@ -1,17 +1,26 @@
-package br.com.gs3tecnologia.usermanager.service;
+package br.com.gs3tecnologia.usermanager.domain.service;
 
 import br.com.gs3tecnologia.usermanager.dto.input.AssignmentProfileInputDTO;
 import br.com.gs3tecnologia.usermanager.dto.output.AssignmentProfileOutputDTO;
 import br.com.gs3tecnologia.usermanager.exception.BusinessException;
-import br.com.gs3tecnologia.usermanager.model.Profile;
-import br.com.gs3tecnologia.usermanager.model.User;
-import br.com.gs3tecnologia.usermanager.repository.UserRepository;
+import br.com.gs3tecnologia.usermanager.domain.model.Profile;
+import br.com.gs3tecnologia.usermanager.domain.model.User;
+import br.com.gs3tecnologia.usermanager.domain.repository.UserRepository;
+import br.com.gs3tecnologia.usermanager.util.Constants;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import static br.com.gs3tecnologia.usermanager.util.Constants.PROFILE_ADMIN;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -23,8 +32,20 @@ public class UserService {
 
     private final ProfileService profileService;
 
+    private final PasswordEncoder passwordEncoder;
+
     public List<User> findAll() {
-        return userRepository.findAll();
+        List<User> users = userRepository.findAll();
+
+        /**
+         * O perfil usuário comum apenas visualizará suas próprias informações
+         */
+        String profileCurrentUser = getProfileCurrentUser();
+        if (!profileCurrentUser.equals(PROFILE_ADMIN)) {
+            users = users.stream().filter(user -> user.getEmail().equals(getUsernameCurrentUser())).collect(Collectors.toList());
+        }
+
+        return users;
     }
 
     public User register(User user) throws BusinessException {
@@ -39,6 +60,7 @@ public class UserService {
         if (nonNull(userFound)) {
             throw new BusinessException("User already exists with the email: " + user.getEmail());
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -52,7 +74,7 @@ public class UserService {
 
         userFoundById.setName(user.getName());
         userFoundById.setEmail(user.getEmail());
-        userFoundById.setPassword(user.getPassword());
+        userFoundById.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(userFoundById);
     }
@@ -71,12 +93,28 @@ public class UserService {
         User user = findById(assignmentProfileInputDTO.getUserId());
         user.setProfile(profile);
 
-        update(user);
+        userRepository.save(user);
 
         return AssignmentProfileOutputDTO.builder()
             .name(user.getName())
             .profile(profile.getName())
             .build();
+    }
+
+    public String getProfileCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return ((Profile)((List<?>) authentication.getAuthorities()).getFirst()).getName();
+        }
+        return null;
+    }
+
+    public String getUsernameCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return (String) authentication.getPrincipal();
+        }
+        return null;
     }
 
 }

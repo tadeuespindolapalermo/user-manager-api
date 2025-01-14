@@ -1,16 +1,17 @@
-package br.com.gs3tecnologia.usermanager.controller;
+package br.com.gs3tecnologia.usermanager.rest.controller;
 
 import br.com.gs3tecnologia.usermanager.dto.input.AssignmentProfileInputDTO;
 import br.com.gs3tecnologia.usermanager.dto.output.AssignmentProfileOutputDTO;
 import br.com.gs3tecnologia.usermanager.dto.output.ResponseDTO;
 import br.com.gs3tecnologia.usermanager.exception.BusinessException;
-import br.com.gs3tecnologia.usermanager.model.User;
-import br.com.gs3tecnologia.usermanager.service.UserService;
+import br.com.gs3tecnologia.usermanager.domain.model.User;
+import br.com.gs3tecnologia.usermanager.domain.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,12 +52,14 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseDTO<String>> delete(@PathVariable Long id) {
         userService.deleteById(id);
         return new ResponseEntity<>(new ResponseDTO<>("User deleted", StringUtils.EMPTY, Boolean.TRUE), HttpStatus.OK);
     }
 
     @PostMapping("/assign-profile")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseDTO<AssignmentProfileOutputDTO>> assignProfile(@Valid @RequestBody AssignmentProfileInputDTO assignmentProfileInputDTO) {
         try {
             AssignmentProfileOutputDTO output = userService.assignProfile(assignmentProfileInputDTO);

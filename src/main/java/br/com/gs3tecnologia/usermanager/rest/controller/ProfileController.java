@@ -1,14 +1,16 @@
-package br.com.gs3tecnologia.usermanager.controller;
+package br.com.gs3tecnologia.usermanager.rest.controller;
 
 import br.com.gs3tecnologia.usermanager.dto.output.ResponseDTO;
 import br.com.gs3tecnologia.usermanager.exception.BusinessException;
-import br.com.gs3tecnologia.usermanager.model.Profile;
-import br.com.gs3tecnologia.usermanager.service.ProfileService;
+import br.com.gs3tecnologia.usermanager.domain.model.Profile;
+import br.com.gs3tecnologia.usermanager.domain.service.ProfileService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,12 +24,14 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseDTO<List<Profile>>> getAll() {
         List<Profile> profiles = profileService.findAll();
         return new ResponseEntity<>(new ResponseDTO<>(profiles, StringUtils.EMPTY, Boolean.TRUE), HttpStatus.OK);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseDTO<Profile>> register(@Valid @RequestBody Profile profile) {
         Profile profileCreated;
         try {
@@ -39,6 +43,7 @@ public class ProfileController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseDTO<Profile>> getById(@PathVariable Long id) {
         try {
             Profile profile = profileService.findById(id);
@@ -49,6 +54,7 @@ public class ProfileController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseDTO<String>> delete(@PathVariable Long id) {
         try {
             profileService.deleteById(id);

@@ -1,7 +1,7 @@
-package br.com.gs3tecnologia.usermanager.repository;
+package br.com.gs3tecnologia.usermanager.domain.repository;
 
-import br.com.gs3tecnologia.usermanager.model.Profile;
-import br.com.gs3tecnologia.usermanager.model.User;
+import br.com.gs3tecnologia.usermanager.domain.model.Profile;
+import br.com.gs3tecnologia.usermanager.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

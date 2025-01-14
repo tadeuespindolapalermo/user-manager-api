@@ -1,10 +1,10 @@
-package br.com.gs3tecnologia.usermanager.service;
+package br.com.gs3tecnologia.usermanager.domain.service;
 
 import br.com.gs3tecnologia.usermanager.exception.BusinessException;
-import br.com.gs3tecnologia.usermanager.model.Profile;
-import br.com.gs3tecnologia.usermanager.model.User;
-import br.com.gs3tecnologia.usermanager.repository.ProfileRepository;
-import br.com.gs3tecnologia.usermanager.repository.UserRepository;
+import br.com.gs3tecnologia.usermanager.domain.model.Profile;
+import br.com.gs3tecnologia.usermanager.domain.model.User;
+import br.com.gs3tecnologia.usermanager.domain.repository.ProfileRepository;
+import br.com.gs3tecnologia.usermanager.domain.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,6 +53,7 @@ public class ProfileService {
         }
 
         profileFoundById.setName(profile.getName());
+        profileFoundById.setDescription(profile.getDescription());
 
         return profileRepository.save(profileFoundById);
     }

@@ -1,20 +1,21 @@
-package br.com.gs3tecnologia.usermanager.model;
+package br.com.gs3tecnologia.usermanager.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
-import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
 @Data
 @Table(name = "TB_USER")
-public class User implements Serializable {
-
+public class User implements UserDetails {
 
 	@Serial
     private static final long serialVersionUID = -5045643614971012521L;
@@ -33,13 +34,26 @@ public class User implements Serializable {
     private String email;
 
     @NotEmpty(message = "Password is required")
-    @Max(value = 8, message = "Password must contain 8 characters")
-    @Min(value = 8, message = "Password must contain 8 characters")
-    @Column(nullable = false, length = 8)
+    @Column(nullable = false)
     private String password;
 
     @ManyToOne
     @JoinColumn(name = "profile_id")
     private Profile profile;
 
+    @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(profile);
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
 }
