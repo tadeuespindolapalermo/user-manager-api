@@ -10,13 +10,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor
-public class ImplementacaoUserDetailsService implements UserDetailsService {
+public class ImplementationUserDetailsService implements UserDetailsService {
 
 	private final UserRepository userRepository;
 
@@ -24,18 +22,18 @@ public class ImplementacaoUserDetailsService implements UserDetailsService {
     @Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		User usuario = userRepository.findByEmail(username);
+		User user = userRepository.findByEmail(username);
 
-		if (isNull(usuario)) {
-			throw new UsernameNotFoundException("User not found");
+		if (isNull(user)) {
+			throw new UsernameNotFoundException("User not found!");
 		}
 
-		if (isNull(usuario.getProfile())) {
+		if (isNull(user.getProfile())) {
 			throw new BusinessException("The user does not have any registered profile!");
 		}
 
 		return new org.springframework.security.core.userdetails.User(
-			usuario.getUsername(), usuario.getPassword(), usuario.getAuthorities()
+			user.getUsername(), user.getPassword(), user.getAuthorities()
 		);
 	}
 

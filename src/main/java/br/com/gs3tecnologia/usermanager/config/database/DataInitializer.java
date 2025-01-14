@@ -4,8 +4,6 @@ import br.com.gs3tecnologia.usermanager.domain.model.Profile;
 import br.com.gs3tecnologia.usermanager.domain.model.User;
 import br.com.gs3tecnologia.usermanager.domain.repository.ProfileRepository;
 import br.com.gs3tecnologia.usermanager.domain.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;

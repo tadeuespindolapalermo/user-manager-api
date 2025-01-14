@@ -38,7 +38,7 @@ public class UserService {
         List<User> users = userRepository.findAll();
 
         /**
-         * O perfil usuário comum apenas visualizará suas próprias informações
+         * Non-admin user will only see their own information
          */
         String profileCurrentUser = getProfileCurrentUser();
         if (!profileCurrentUser.equals(PROFILE_ADMIN)) {

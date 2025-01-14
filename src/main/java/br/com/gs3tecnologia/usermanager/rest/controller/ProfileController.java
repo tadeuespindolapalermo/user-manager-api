@@ -1,10 +1,9 @@
 package br.com.gs3tecnologia.usermanager.rest.controller;
 
-import br.com.gs3tecnologia.usermanager.dto.output.ResponseDTO;
-import br.com.gs3tecnologia.usermanager.exception.BusinessException;
 import br.com.gs3tecnologia.usermanager.domain.model.Profile;
 import br.com.gs3tecnologia.usermanager.domain.service.ProfileService;
-import jakarta.annotation.security.RolesAllowed;
+import br.com.gs3tecnologia.usermanager.dto.output.ResponseDTO;
+import br.com.gs3tecnologia.usermanager.exception.BusinessException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;

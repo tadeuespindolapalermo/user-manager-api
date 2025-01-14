@@ -1,12 +1,13 @@
 package br.com.gs3tecnologia.usermanager.config.security;
 
-import br.com.gs3tecnologia.usermanager.config.security.service.JWTTokenAutenticacaoService;
+import br.com.gs3tecnologia.usermanager.config.security.service.JWTTokenAuthenticationService;
 import br.com.gs3tecnologia.usermanager.domain.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,43 +18,42 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.IOException;
 
-//Estabelece gerenciador de token
+import static br.com.gs3tecnologia.usermanager.util.Constants.METHOD_HTTP_OPTIONS;
+
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
-	// Configurando o gerenciador de autenticação
+	private static final Logger logger = LoggerFactory.getLogger(JWTLoginFilter.class);
+
 	protected JWTLoginFilter(String url, AuthenticationManager authenticationManager) {
-		
-		// Obriga a autenticar a url
 		super(new AntPathRequestMatcher(url));
-		
-		// Gerenciador de autenticação
 		setAuthenticationManager(authenticationManager);
 	}
 
-	// Retorna o usuário ao processar a autenticação
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException {
 
-		// Está pegando o token para validar
-		if (request.getMethod().equals("OPTIONS")) {
+		if (request.getMethod().equals(METHOD_HTTP_OPTIONS)) {
 			return null;
 		}
+
 		User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
 		
-		// Retorna o usuário login, senha e acesso		
 		return getAuthenticationManager()
-				.authenticate(new UsernamePasswordAuthenticationToken(
-					user.getEmail(), user.getPassword()));
+			.authenticate(
+				new UsernamePasswordAuthenticationToken(
+					user.getEmail(), user.getPassword()
+				)
+			);
 	}
 	
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult){
 		try {
-			new JWTTokenAutenticacaoService().addAuthentication(response, authResult.getName());
+			new JWTTokenAuthenticationService().addAuthentication(response, authResult.getName());
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 	}
 	

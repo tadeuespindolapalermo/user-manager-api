@@ -1,6 +1,6 @@
 package br.com.gs3tecnologia.usermanager.config.security;
 
-import br.com.gs3tecnologia.usermanager.config.security.service.JWTTokenAutenticacaoService;
+import br.com.gs3tecnologia.usermanager.config.security.service.JWTTokenAuthenticationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -12,23 +12,17 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-// Filtro onde todas as requisições serão capturadas para autenticar
-public class JwtApiAutenticacaoFilter extends GenericFilterBean {
+public class JwtApiAuthenticationFilter extends GenericFilterBean {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
 		try {
-			// Estabelece autenticação para a requisição
-			Authentication authentication = new JWTTokenAutenticacaoService().getAuthentication((HttpServletRequest) request, (HttpServletResponse) response);
-			
-			// Coloca o processo de autenticação no spring security
+			Authentication authentication = new JWTTokenAuthenticationService().getAuthentication((HttpServletRequest) request, (HttpServletResponse) response);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			
-			// Continua o processo
 			chain.doFilter(request, response);
 		} catch (Exception e) {
 			e.printStackTrace();
-			response.getWriter().write("Ocorreu um erro no sistema, avise o administrador: \n" + e.getMessage());
+			response.getWriter().write("A system error has occurred, please notify the administrator: " + e.getMessage());
 		}
 	}
 

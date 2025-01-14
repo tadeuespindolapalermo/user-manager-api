@@ -8,35 +8,26 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Service
-public class JWTTokenAutenticacaoService {
+public class JWTTokenAuthenticationService {
 
-	@Value("${jwt.secret}")
-	private String jwtSecret;
-	
-	// 24h
 	private static final long EXPIRATION_TIME = 86400000;
-	
 	private static final String SECRET = "8z6EwPYz3nLwzgNqwgMKgDYhIWipy5a95DUaE39XoQ2nuCvK7PAB3aXcvE9hTQgc8z6EwPYz3nLwzgNqwgMKgDYhIWipy5a95DUaE39XoQ2nuCvK7PAB3aXcvE9hTQgc";
-	
 	private static final String TOKEN_PREFIX = "Bearer";
-	
 	private static final String HEADER_STRING = "Authorization";
 	
 	public void addAuthentication(HttpServletResponse response, String username) throws IOException {
@@ -46,8 +37,7 @@ public class JWTTokenAutenticacaoService {
 
 		List<String> profiles = Collections.singletonList(user.getProfile().getName());
 
-		// Montagem do Token
-		String jwt = 
+		String jwt =
 			Jwts.builder()
 				.setSubject(username)
 				.claim("roles", profiles)
@@ -59,20 +49,21 @@ public class JWTTokenAutenticacaoService {
 
 		String token = TOKEN_PREFIX + " " + jwt;
 		response.addHeader(HEADER_STRING, token);
-		liberarCorsPolicy(response);
+		addCorsPolicyToResponse(response);
 
 		response.getWriter().write("{\"Authorization\": \"" + token + "\"}");
 	}
 	
 	public Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String token = request.getHeader(HEADER_STRING);
+
 		try {
 			if (nonNull(token)) {
-				String tokenLimpo = token.replace(TOKEN_PREFIX, "");
+				String cleanToken = token.replace(TOKEN_PREFIX, EMPTY);
 				Integer userId = (Integer) Jwts.parserBuilder()
 					.setSigningKey(SECRET.getBytes())
 					.build()
-					.parseClaimsJws(tokenLimpo)
+					.parseClaimsJws(cleanToken)
 					.getBody()
 					.get("id");
 
@@ -89,19 +80,18 @@ public class JWTTokenAutenticacaoService {
 				}
 			}
 		} catch(ExpiredJwtException e) {
-			response.getWriter().write("O token está expirado! Efetue o login novamente!");
+			response.getWriter().write("The token has expired! Please log in again!");
 		} catch(MalformedJwtException e) {
-			response.getWriter().write("O token está mal formado! Utilize um outro token!");
+			response.getWriter().write("The token is malformed! Use another token!");
 		} catch(JwtException e) {
-			response.getWriter().write("O token está inválido!");
+			response.getWriter().write("The token is invalid!");
 		} finally {
-			liberarCorsPolicy(response);
+			addCorsPolicyToResponse(response);
 		}
 		return null;
 	}
 	
-	// CORS policy
-	private void liberarCorsPolicy(HttpServletResponse response) {
+	private void addCorsPolicyToResponse(HttpServletResponse response) {
 		if (isNull(response.getHeader("Access-Control-Allow-Origin"))) {
 			response.addHeader("Access-Control-Allow-Origin", "*");		
 		}
